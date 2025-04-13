@@ -1,6 +1,6 @@
 # Dockerized Claude Code MCP Server
 
-A simple Docker container for running Claude Code MCP server.
+A simple Docker container for running Claude Code MCP server with enhanced security features.
 
 ## Development Environment
 
@@ -8,6 +8,7 @@ This Docker container provides a pre-configured development environment with:
 
 - **Base OS**: Ubuntu
 - **Build Tools**: git, curl, wget, etc.
+- **Security**: Network firewall to prevent unauthorized outbound connections
 
 You can customize the Dockerfile to add additional development tools or languages specific to your projects.
 
@@ -39,6 +40,8 @@ Configure Claude Desktop settings file (`~/Library/Application\ Support/Claude/c
         "run",
         "-i",
         "--rm",
+        "--cap-add=NET_ADMIN",
+        "--cap-add=NET_RAW",
         "-v", "/Users/username/.claude:/home/node/.claude",
         "-v", "/Users/username/project-1:/workspaces/project-1",
         "-v", "/Users/username/project-2:/workspaces/project-2",
@@ -74,3 +77,17 @@ just build
 ```
 
 Then restart your MCP client connection.
+
+## Security Features
+
+This container includes a network firewall that restricts outbound connections to only approved domains:
+
+- GitHub domains (api.github.com, github.com, etc.)
+- NPM registry (registry.npmjs.org)
+- Anthropic APIs (api.anthropic.com, statsig.anthropic.com)
+- Rust-related domains (crates.io, static.rust-lang.org, etc.)
+- Other required services (sentry.io, etc.)
+
+The firewall is automatically enabled when the container is started with the necessary capabilities (`--cap-add=NET_ADMIN` and `--cap-add=NET_RAW`). If these capabilities are not provided, the container will still run but without the network security restrictions.
+
+This security feature helps prevent potential data exfiltration attempts through the MCP server.
