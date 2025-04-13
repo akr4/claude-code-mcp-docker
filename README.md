@@ -24,7 +24,9 @@ Or if you have [just](https://github.com/casey/just) installed:
 just build
 ```
 
-### 2. Claude Desktop Configuration
+### 2. MCP Client Configuration
+
+#### (Example) Claude Desktop Configuration
 
 Configure Claude Desktop settings file (`~/Library/Application\ Support/Claude/claude_desktop_config.json` on macOS for example) as follows:
 
@@ -71,4 +73,4 @@ Or with just:
 just build
 ```
 
-Then restart Claude Desktop.
+Then restart your MCP client connection.
