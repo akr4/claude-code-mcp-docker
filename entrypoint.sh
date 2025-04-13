@@ -12,5 +12,5 @@ echo "Initializing security firewall..."
 /usr/local/bin/init-firewall.sh
 
 # Switch to non-root user and start the MCP server
-echo "Switching to user $USERNAME for running Claude Code MCP"
+echo "Switching to user $USERNAME for running Claude Code MCP server"
 exec su -c "mise exec -- claude mcp serve" $USERNAME

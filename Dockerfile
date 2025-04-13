@@ -1,8 +1,6 @@
 FROM ubuntu:24.04
 
 ARG USERNAME=claude
-ARG USER_UID=1000
-ARG USER_GID=$USER_UID
 
 # Install security tools and basic dependencies
 RUN apt-get update && apt-get install -y \
@@ -11,9 +9,8 @@ RUN apt-get update && apt-get install -y \
     # For creating non-root user
     ca-certificates gnupg2
 
-# Create non-root user
-RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
+# Create non-root user with system-assigned UID/GID
+RUN useradd -m $USERNAME
 
 WORKDIR /workspace
 
