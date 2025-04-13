@@ -1,4 +1,4 @@
-# Dockerized Claude Code MCP
+# Dockerized Claude Code MCP Server
 
 A simple Docker container for running Claude Code MCP server.
 
