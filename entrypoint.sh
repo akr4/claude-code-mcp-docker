@@ -3,7 +3,7 @@ set -e
 
 # Check if we have the necessary capabilities
 if [ ! -e "/proc/sys/net/ipv4/ip_forward" ]; then
-  echo "ERROR: NET_ADMIN capability not available. Container must be run with '--cap-add=NET_ADMIN --cap-add=NET_RAW'"
+  echo "ERROR: NET_ADMIN capability not available. Container must be run with '--cap-add=NET_ADMIN'"
   exit 1
 fi
 

@@ -41,7 +41,6 @@ Configure Claude Desktop settings file (`~/Library/Application\ Support/Claude/c
         "-i",
         "--rm",
         "--cap-add=NET_ADMIN",
-        "--cap-add=NET_RAW",
         "-v", "/Users/username/.claude:/home/claude/.claude",
         "-v", "/Users/username/project-1:/workspaces/project-1",
         "-v", "/Users/username/project-2:/workspaces/project-2",
@@ -87,7 +86,7 @@ This container includes a network firewall that restricts outbound connections t
 - Anthropic APIs (api.anthropic.com, statsig.anthropic.com)
 - Other required services (sentry.io, etc.)
 
-The firewall is automatically enabled when the container is started with the necessary capabilities (`--cap-add=NET_ADMIN` and `--cap-add=NET_RAW`). These capabilities are **required** for the container to run - if they are not provided, the container will exit immediately for security reasons.
+The firewall is automatically enabled when the container is started with the necessary capabilities (`--cap-add=NET_ADMIN`). These capabilities are **required** for the container to run - if they are not provided, the container will exit immediately for security reasons.
 
 Key security features:
 - Firewall configuration is handled by the root user
