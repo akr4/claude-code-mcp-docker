@@ -30,7 +30,6 @@ Configure Claude Desktop settings file (`~/Library/Application\ Support/Claude/c
 
 ```json
 {
-  "globalShortcut": "",
   "mcpServers": {
     "claude-code": {
       "command": "docker",
