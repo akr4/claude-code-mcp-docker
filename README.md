@@ -1,6 +1,6 @@
 # Dockerized Claude Code MCP
 
-A simple Docker container for running Claude Code MCP server with Claude Desktop.
+A simple Docker container for running Claude Code MCP server.
 
 ## Development Environment
 
