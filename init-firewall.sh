@@ -32,25 +32,25 @@ iptables -A OUTPUT -o lo -j ACCEPT
 ipset create allowed-domains hash:net
 
 # Fetch GitHub meta information and aggregate + add their IP ranges
-echo "Fetching GitHub IP ranges..."
+echo "Fetching GitHub IP ranges..." >&2
 gh_ranges=$(curl -s https://api.github.com/meta)
 if [ -z "$gh_ranges" ]; then
-    echo "ERROR: Failed to fetch GitHub IP ranges"
+    echo "ERROR: Failed to fetch GitHub IP ranges" >&2
     exit 1
 fi
 
 if ! echo "$gh_ranges" | jq -e '.web and .api and .git' >/dev/null; then
-    echo "ERROR: GitHub API response missing required fields"
+    echo "ERROR: GitHub API response missing required fields" >&2
     exit 1
 fi
 
-echo "Processing GitHub IPs..."
+echo "Processing GitHub IPs..." >&2
 while read -r cidr; do
     if [[ ! "$cidr" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/[0-9]{1,2}$ ]]; then
-        echo "ERROR: Invalid CIDR range from GitHub meta: $cidr"
+        echo "ERROR: Invalid CIDR range from GitHub meta: $cidr" >&2
         exit 1
     fi
-    echo "Adding GitHub range $cidr"
+    echo "Adding GitHub range $cidr" >&2
     ipset add allowed-domains "$cidr"
 done < <(echo "$gh_ranges" | jq -r '(.web + .api + .git)[]' | aggregate -q)
 
@@ -58,19 +58,19 @@ done < <(echo "$gh_ranges" | jq -r '(.web + .api + .git)[]' | aggregate -q)
 for domain in \
     "registry.npmjs.org" \
     "sentry.io"; do
-    echo "Resolving $domain..."
+    echo "Resolving $domain..." >&2
     ips=$(dig +short A "$domain")
     if [ -z "$ips" ]; then
-        echo "ERROR: Failed to resolve $domain"
+        echo "ERROR: Failed to resolve $domain" >&2
         exit 1
     fi
     
     while read -r ip; do
         if [[ ! "$ip" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-            echo "ERROR: Invalid IP from DNS for $domain: $ip"
+            echo "ERROR: Invalid IP from DNS for $domain: $ip" >&2
             exit 1
         fi
-        echo "Adding $ip for $domain"
+        echo "Adding $ip for $domain" >&2
         ipset add allowed-domains "$ip"
     done < <(echo "$ips")
 done
@@ -78,12 +78,12 @@ done
 # Get host IP from default route
 HOST_IP=$(ip route | grep default | cut -d" " -f3)
 if [ -z "$HOST_IP" ]; then
-    echo "ERROR: Failed to detect host IP"
+    echo "ERROR: Failed to detect host IP" >&2
     exit 1
 fi
 
 HOST_NETWORK=$(echo "$HOST_IP" | sed "s/\.[0-9]*$/.0\/24/")
-echo "Host network detected as: $HOST_NETWORK"
+echo "Host network detected as: $HOST_NETWORK" >&2
 
 # Set up remaining iptables rules
 iptables -A INPUT -s "$HOST_NETWORK" -j ACCEPT
@@ -102,19 +102,19 @@ iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 # Then allow only specific outbound traffic to allowed domains
 iptables -A OUTPUT -m set --match-set allowed-domains dst -j ACCEPT
 
-echo "Firewall configuration complete"
-echo "Verifying firewall rules..."
+echo "Firewall configuration complete" >&2
+echo "Verifying firewall rules..." >&2
 if curl --connect-timeout 5 https://example.com >/dev/null 2>&1; then
-    echo "ERROR: Firewall verification failed - was able to reach https://example.com"
+    echo "ERROR: Firewall verification failed - was able to reach https://example.com" >&2
     exit 1
 else
-    echo "Firewall verification passed - unable to reach https://example.com as expected"
+    echo "Firewall verification passed - unable to reach https://example.com as expected" >&2
 fi
 
 # Verify GitHub API access
 if ! curl --connect-timeout 5 https://api.github.com/zen >/dev/null 2>&1; then
-    echo "ERROR: Firewall verification failed - unable to reach https://api.github.com"
+    echo "ERROR: Firewall verification failed - unable to reach https://api.github.com" >&2
     exit 1
 else
-    echo "Firewall verification passed - able to reach https://api.github.com as expected"
+    echo "Firewall verification passed - able to reach https://api.github.com as expected" >&2
 fi

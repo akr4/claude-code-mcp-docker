@@ -42,8 +42,8 @@ Configure Claude Desktop settings file (`~/Library/Application\ Support/Claude/c
         "--rm",
         "--cap-add=NET_ADMIN",
         "-v", "/Users/username/.claude:/home/claude/.claude",
-        "-v", "/Users/username/project-1:/workspaces/project-1",
-        "-v", "/Users/username/project-2:/workspaces/project-2",
+        "-v", "/Users/username/project-1:/workspace/project-1",
+        "-v", "/Users/username/project-2:/workspace/project-2",
         "my-claude-mcp:latest"
       ]
     }

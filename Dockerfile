@@ -34,28 +34,19 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# Add mise to PATH for non-root user
-RUN echo 'export PATH="$HOME/.local/bin:$PATH"' >> /home/$USERNAME/.bashrc && \
-    echo 'eval "$(mise activate bash)"' >> /home/$USERNAME/.bashrc
 
-# Make sure user can access mise
-RUN mkdir -p /home/$USERNAME/.local/bin && \
-    cp /root/.local/bin/mise /home/$USERNAME/.local/bin/ && \
-    chown -R $USERNAME:$USERNAME /home/$USERNAME/.local
-
-# Copy security scripts
+#---------------------------
+# Firewall
+#---------------------------
 COPY init-firewall.sh /usr/local/bin/
-COPY entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/init-firewall.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/init-firewall.sh
 
-# Create workspace directory with proper permissions
 RUN mkdir -p /workspace && chown -R $USERNAME:$USERNAME /workspace
 
-# Switch to root to start with entrypoint.sh
-USER root
 
-# This CMD will be overridden by the ENTRYPOINT
-CMD ["mise", "exec", "--", "claude", "mcp", "serve"]
-
-# Use entrypoint.sh as the entry point to handle permissions correctly
+#---------------------------
+# Entrypoint
+#---------------------------
+COPY entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
