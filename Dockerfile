@@ -1,10 +1,19 @@
 FROM ubuntu:24.04
 
-ARG USERNAME=node
+ARG USERNAME=claude
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
 
+# Install security tools and basic dependencies
 RUN apt-get update && apt-get install -y \
     curl wget git build-essential \
-    iptables ipset iproute2 dnsutils aggregate jq sudo
+    iptables ipset iproute2 dnsutils aggregate jq sudo \
+    # For creating non-root user
+    ca-certificates gnupg2
+
+# Create non-root user
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
 
 WORKDIR /workspace
 
@@ -18,7 +27,6 @@ ENV PATH="/root/.local/bin:$PATH"
 RUN mise install node && mise use node
 RUN mise exec -- npm install -g @anthropic-ai/claude-code
 
-
 #---------------------------
 # Other tools
 #---------------------------
@@ -29,26 +37,28 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
+# Add mise to PATH for non-root user
+RUN echo 'export PATH="$HOME/.local/bin:$PATH"' >> /home/$USERNAME/.bashrc && \
+    echo 'eval "$(mise activate bash)"' >> /home/$USERNAME/.bashrc
 
-#----------------------------
-# Run Claude Code
-#----------------------------
-# Create entrypoint script to run firewall setup and then start the MCP server
-RUN echo '#!/bin/bash\n\
-set -e\n\
-\n\
-# Initialize firewall if NET_ADMIN capability is available\n\
-if [ -e "/proc/sys/net/ipv4/ip_forward" ]; then\n\
-  echo "Initializing security firewall..."\n\
-  /usr/local/bin/init-firewall.sh\n\
-else\n\
-  echo "NET_ADMIN capability not available, skipping firewall setup"\n\
-fi\n\
-\n\
-# Start the MCP server\n\
-exec mise exec -- claude mcp serve\n\
-' > /usr/local/bin/entrypoint.sh
+# Make sure user can access mise
+RUN mkdir -p /home/$USERNAME/.local/bin && \
+    cp /root/.local/bin/mise /home/$USERNAME/.local/bin/ && \
+    chown -R $USERNAME:$USERNAME /home/$USERNAME/.local
 
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Copy security scripts
+COPY init-firewall.sh /usr/local/bin/
+COPY entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/init-firewall.sh /usr/local/bin/entrypoint.sh
 
-CMD ["/usr/local/bin/entrypoint.sh"]
+# Create workspace directory with proper permissions
+RUN mkdir -p /workspace && chown -R $USERNAME:$USERNAME /workspace
+
+# Switch to root to start with entrypoint.sh
+USER root
+
+# This CMD will be overridden by the ENTRYPOINT
+CMD ["mise", "exec", "--", "claude", "mcp", "serve"]
+
+# Use entrypoint.sh as the entry point to handle permissions correctly
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

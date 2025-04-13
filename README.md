@@ -42,7 +42,7 @@ Configure Claude Desktop settings file (`~/Library/Application\ Support/Claude/c
         "--rm",
         "--cap-add=NET_ADMIN",
         "--cap-add=NET_RAW",
-        "-v", "/Users/username/.claude:/home/node/.claude",
+        "-v", "/Users/username/.claude:/home/claude/.claude",
         "-v", "/Users/username/project-1:/workspaces/project-1",
         "-v", "/Users/username/project-2:/workspaces/project-2",
         "my-claude-mcp:latest"
@@ -85,9 +85,14 @@ This container includes a network firewall that restricts outbound connections t
 - GitHub domains (api.github.com, github.com, etc.)
 - NPM registry (registry.npmjs.org)
 - Anthropic APIs (api.anthropic.com, statsig.anthropic.com)
-- Rust-related domains (crates.io, static.rust-lang.org, etc.)
 - Other required services (sentry.io, etc.)
 
-The firewall is automatically enabled when the container is started with the necessary capabilities (`--cap-add=NET_ADMIN` and `--cap-add=NET_RAW`). If these capabilities are not provided, the container will still run but without the network security restrictions.
+The firewall is automatically enabled when the container is started with the necessary capabilities (`--cap-add=NET_ADMIN` and `--cap-add=NET_RAW`). These capabilities are **required** for the container to run - if they are not provided, the container will exit immediately for security reasons.
+
+Key security features:
+- Firewall configuration is handled by the root user
+- Claude Code MCP runs as a non-root user (claude) without sudo privileges
+- Strict firewall rules prevent unauthorized network access
+- Automatic verification of firewall configuration during startup
 
 This security feature helps prevent potential data exfiltration attempts through the MCP server.
