@@ -34,6 +34,11 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
+# Git configuration
+RUN git config --global user.name "Claude" && \
+    git config --global user.email "claude@aiiro-systems.com" && \
+    git config --global init.defaultBranch main
+
 
 #---------------------------
 # Firewall
