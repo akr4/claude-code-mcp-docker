@@ -14,9 +14,7 @@ echo "Initializing security firewall..." >&2
 # Configure git email if provided
 if [ ! -z "${GIT_USER_EMAIL}" ]; then
   echo "Setting Git email to ${GIT_USER_EMAIL}" >&2
-  # Set for root user
-  git config --global user.email "${GIT_USER_EMAIL}"
-  # Set for non-root user
+  # Set for non-root user only
   su -c "git config --global user.email \"${GIT_USER_EMAIL}\"" $USERNAME
 fi
 
