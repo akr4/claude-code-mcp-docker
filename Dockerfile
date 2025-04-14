@@ -36,14 +36,9 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 
 # Git configuration for root user
 RUN git config --global user.name "Claude" && \
-    git config --global user.email "claude@aiiro-systems.com" && \
     git config --global init.defaultBranch main
 
-# Git configuration for non-root user
-RUN sudo -u $USERNAME git config --global user.name "Claude" && \
-    sudo -u $USERNAME git config --global user.email "claude@aiiro-systems.com" && \
-    sudo -u $USERNAME git config --global init.defaultBranch main
-
+# We'll handle email via environment variable in entrypoint script
 
 #---------------------------
 # Firewall
@@ -51,7 +46,19 @@ RUN sudo -u $USERNAME git config --global user.name "Claude" && \
 COPY init-firewall.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/init-firewall.sh
 
+# Set up workspace directory
 RUN mkdir -p /workspace && chown -R $USERNAME:$USERNAME /workspace
+
+# Switch to non-root user
+USER $USERNAME
+WORKDIR /workspace
+
+# Git configuration for non-root user (name only, email via env var)
+RUN git config --global user.name "Claude" && \
+    git config --global init.defaultBranch main
+
+# Switch back to root for entrypoint
+USER root
 
 
 #---------------------------

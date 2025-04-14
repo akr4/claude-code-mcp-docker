@@ -11,6 +11,15 @@ fi
 echo "Initializing security firewall..." >&2
 /usr/local/bin/init-firewall.sh
 
+# Configure git email if provided
+if [ ! -z "${GIT_USER_EMAIL}" ]; then
+  echo "Setting Git email to ${GIT_USER_EMAIL}" >&2
+  # Set for root user
+  git config --global user.email "${GIT_USER_EMAIL}"
+  # Set for non-root user
+  su -c "git config --global user.email \"${GIT_USER_EMAIL}\"" $USERNAME
+fi
+
 # Switch to non-root user and start the MCP server
 echo "Switching to user $USERNAME for running Claude Code MCP server" >&2
 exec su -c "/root/.local/bin/mise exec -- claude mcp serve" $USERNAME
