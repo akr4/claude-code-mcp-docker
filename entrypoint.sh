@@ -11,10 +11,15 @@ fi
 echo "Initializing security firewall..." >&2
 /usr/local/bin/init-firewall.sh
 
-# Configure git email if provided
+# Configure git settings for non-root user
+echo "Setting up Git configuration" >&2
+# Set default git user name and branch
+su -c "git config --global user.name \"Claude\"" $USERNAME
+su -c "git config --global init.defaultBranch main" $USERNAME
+
+# Set git email if provided
 if [ ! -z "${GIT_USER_EMAIL}" ]; then
   echo "Setting Git email to ${GIT_USER_EMAIL}" >&2
-  # Set for non-root user only
   su -c "git config --global user.email \"${GIT_USER_EMAIL}\"" $USERNAME
 fi
 

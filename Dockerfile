@@ -47,9 +47,7 @@ RUN mkdir -p /workspace && chown -R $USERNAME:$USERNAME /workspace
 USER $USERNAME
 WORKDIR /workspace
 
-# Git configuration for non-root user (name only, email via env var)
-RUN git config --global user.name "Claude" && \
-    git config --global init.defaultBranch main
+# Git configuration will be handled in entrypoint.sh
 
 # Switch back to root for entrypoint
 USER root
