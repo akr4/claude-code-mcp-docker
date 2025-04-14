@@ -11,6 +11,10 @@ fi
 echo "Initializing security firewall..." >&2
 /usr/local/bin/init-firewall.sh
 
+# Make sure workspace directory has correct permissions
+echo "Ensuring workspace directory permissions..." >&2
+chown -R $USERNAME:$USERNAME /workspace
+
 # Switch to non-root user and start the MCP server
-echo "Switching to user $USERNAME for running Claude Code MCP server" >&2
+echo "Starting Claude Code MCP server as user $USERNAME..." >&2
 exec su -c "/root/.local/bin/mise exec -- claude mcp serve" $USERNAME
