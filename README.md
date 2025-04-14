@@ -75,40 +75,14 @@ Or with just:
 just build
 ```
 
-Then restart your MCP client connection.
+## Environment Variables
 
-## Git Configuration
+The container supports the following environment variables:
 
-The container automatically configures Git for the non-root user with the following settings:
-
-- **User name**: "Claude" (default)
-- **Default branch**: "main" (default)
-- **Email address**: optional, set via environment variable
-
-### Configuring Git Email
-
-To set a Git email address, add the `GIT_USER_EMAIL` environment variable to your Docker run command:
-
-```bash
-docker run -e GIT_USER_EMAIL=your.email@example.com ...
-```
-
-For the MCP client configuration, update your args array as follows:
-
-```json
-"args": [
-  "run",
-  "-i",
-  "--rm",
-  "--cap-add=NET_ADMIN",
-  "-e", "GIT_USER_EMAIL=your.email@example.com",
-  "-v", "/Users/username/.claude:/home/claude/.claude",
-  "-v", "/Users/username/project-1:/workspace/project-1",
-  "my-claude-mcp:latest"
-]
-```
-
-If the `GIT_USER_EMAIL` environment variable is not provided, Git will operate with the default configuration (no email address set).
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `GIT_USER_NAME` | User name for Git commits | Claude | No |
+| `GIT_USER_EMAIL` | Email address for Git commits | None | No |
 
 ## Security Features
 
